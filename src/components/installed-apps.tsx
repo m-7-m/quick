@@ -1,7 +1,6 @@
 import { invoke } from "@tauri-apps/api/core"
-import { IconTrash } from "@tabler/icons-react"
 import { useEffect, useState } from "react"
-import { Button } from "@/components/ui/button"
+import { toast } from "sonner"
 import {
   Card,
   CardContent,
@@ -10,6 +9,8 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { Checkbox } from "@/components/ui/checkbox"
+import { UninstallAlert } from "@/components/uninstall-alert"
+import { useWinget } from "@/hooks/use-winget"
 import {
   Table,
   TableBody,
@@ -26,17 +27,13 @@ type InstalledApp = {
   source: string | null
 }
 
-function errorMessage(error: unknown): string {
-  return error instanceof Error ? error.message : String(error)
-}
-
 export default function InstalledApps() {
   const [apps, setApps] = useState<InstalledApp[]>([])
   const [selectedIds, setSelectedIds] = useState<Set<string>>(() => new Set())
-  const [isLoading, setIsLoading] = useState(true)
+  const [isLoadingApps, setIsLoadingApps] = useState(true)
   const [loadError, setLoadError] = useState<string | null>(null)
-  const [actionError, setActionError] = useState<string | null>(null)
   const [busyAppId, setBusyAppId] = useState<string | null>(null)
+  const { remove, isLoading: isRemoving } = useWinget()
 
   useEffect(() => {
     let disposed = false
@@ -46,10 +43,12 @@ export default function InstalledApps() {
         if (!disposed) setApps(installedApps)
       })
       .catch((error: unknown) => {
-        if (!disposed) setLoadError(errorMessage(error))
+        if (!disposed) {
+          setLoadError(error instanceof Error ? error.message : String(error))
+        }
       })
       .finally(() => {
-        if (!disposed) setIsLoading(false)
+        if (!disposed) setIsLoadingApps(false)
       })
 
     return () => {
@@ -71,12 +70,9 @@ export default function InstalledApps() {
   }
 
   async function uninstallApp(app: InstalledApp) {
-    if (!window.confirm(`Uninstall ${app.name}?`)) return
-
     setBusyAppId(app.id)
-    setActionError(null)
     try {
-      await invoke("winget_uninstall", { id: app.id })
+      await remove(app.id)
       setApps((current) =>
         current.filter((installedApp) => installedApp.id !== app.id)
       )
@@ -85,8 +81,10 @@ export default function InstalledApps() {
         next.delete(app.id)
         return next
       })
-    } catch (error) {
-      setActionError(`Could not uninstall ${app.name}: ${errorMessage(error)}`)
+      toast.success(`${app.name} uninstalled successfully.`)
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error)
+      toast.error(`Could not uninstall ${app.name}: ${message}`)
     } finally {
       setBusyAppId(null)
     }
@@ -97,7 +95,7 @@ export default function InstalledApps() {
       <CardHeader>
         <CardTitle>Installed apps</CardTitle>
         <CardDescription>
-          {isLoading
+          {isLoadingApps
             ? "Loading installed apps…"
             : `${apps.length} app${apps.length === 1 ? "" : "s"} installed${selectedIds.size ? ` · ${selectedIds.size} selected` : ""}`}
         </CardDescription>
@@ -108,11 +106,6 @@ export default function InstalledApps() {
             Could not load installed apps: {loadError}
           </p>
         )}
-        {actionError && (
-          <p className="mb-4 text-sm text-destructive" role="alert">
-            {actionError}
-          </p>
-        )}
         <Table>
           <TableHeader>
             <TableRow>
@@ -120,7 +113,7 @@ export default function InstalledApps() {
                 <Checkbox
                   aria-label="Select all installed apps"
                   checked={apps.length > 0 && selectedIds.size === apps.length}
-                  disabled={isLoading || apps.length === 0}
+                  disabled={isLoadingApps || apps.length === 0}
                   onCheckedChange={toggleAll}
                 />
               </TableHead>
@@ -130,7 +123,7 @@ export default function InstalledApps() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {isLoading ? (
+            {isLoadingApps ? (
               <TableRow>
                 <TableCell
                   colSpan={4}
@@ -163,15 +156,12 @@ export default function InstalledApps() {
                   <TableCell className="font-medium">{app.name}</TableCell>
                   <TableCell>{app.version}</TableCell>
                   <TableCell className="text-right">
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      disabled={busyAppId !== null}
-                      onClick={() => void uninstallApp(app)}
-                    >
-                      <IconTrash />
-                      {busyAppId === app.id ? "Removing…" : "Uninstall"}
-                    </Button>
+                    <UninstallAlert
+                      appName={app.name}
+                      disabled={isRemoving}
+                      isLoading={busyAppId === app.id}
+                      onConfirm={() => uninstallApp(app)}
+                    />
                   </TableCell>
                 </TableRow>
               ))

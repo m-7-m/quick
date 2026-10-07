@@ -2,6 +2,7 @@ import { SidebarProvider } from "./components/ui/sidebar"
 import { AppSidebar } from "./components/app-sidebar"
 import { Switch, Route } from "wouter"
 import HomePage from "./pages/home"
+import { Toaster } from "@/components/ui/sonner"
 
 export function App() {
   return (
@@ -12,6 +13,7 @@ export function App() {
           <Route path="/" component={HomePage} />
           <Route>404: No such page!</Route>
         </Switch>
+        <Toaster position="top-center" />
       </main>
     </SidebarProvider>
   )

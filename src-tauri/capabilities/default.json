@@ -3,5 +3,57 @@
   "identifier": "default",
   "description": "enables the default permissions",
   "windows": ["main"],
-  "permissions": ["core:default", "shell:default"]
+  "permissions": [
+    "core:default",
+    "shell:default",
+    {
+      "identifier": "shell:allow-execute",
+      "allow": [
+        {
+          "name": "winget-install",
+          "cmd": "winget",
+          "args": [
+            "install",
+            "--id",
+            { "validator": "^[A-Za-z0-9._-]+$" },
+            "--exact",
+            "--accept-package-agreements",
+            "--accept-source-agreements"
+          ]
+        },
+        {
+          "name": "winget-upgrade",
+          "cmd": "winget",
+          "args": [
+            "upgrade",
+            "--id",
+            { "validator": "^[A-Za-z0-9._-]+$" },
+            "--exact",
+            "--accept-package-agreements",
+            "--accept-source-agreements"
+          ]
+        },
+        {
+          "name": "winget-upgrade-all",
+          "cmd": "winget",
+          "args": [
+            "upgrade",
+            "--all",
+            "--accept-package-agreements",
+            "--accept-source-agreements"
+          ]
+        },
+        {
+          "name": "winget-uninstall",
+          "cmd": "winget",
+          "args": [
+            "uninstall",
+            "--id",
+            { "validator": "^[A-Za-z0-9._-]+$" },
+            "--exact"
+          ]
+        }
+      ]
+    }
+  ]
 }
