@@ -1,5 +1,7 @@
-pub use crate::winget_parser::Package;
-use crate::winget_parser::{parse_list_output, parse_search_output};
+pub use crate::winget_parser::{AvailableUpdate, Package};
+use crate::winget_parser::{
+    parse_available_updates_output, parse_list_output, parse_search_output,
+};
 use serde::Serialize;
 use std::{
     collections::VecDeque,
@@ -89,6 +91,11 @@ impl WingetService {
     pub fn list_installed(&self) -> Result<Vec<Package>, WingetError> {
         let output = self.run_capture(&["list"])?;
         Ok(parse_list_output(&output))
+    }
+
+    pub fn list_available_updates(&self) -> Result<Vec<AvailableUpdate>, WingetError> {
+        let output = self.run_capture(&["upgrade", "--accept-source-agreements"])?;
+        Ok(parse_available_updates_output(&output))
     }
 
     pub fn install(
@@ -356,6 +363,17 @@ pub async fn winget_list_installed(
 ) -> Result<Vec<Package>, String> {
     let service = service.inner().clone();
     tauri::async_runtime::spawn_blocking(move || service.list_installed())
+        .await
+        .map_err(|error| error.to_string())?
+        .map_err(|error| error.to_string())
+}
+
+#[tauri::command]
+pub async fn winget_list_available_updates(
+    service: State<'_, WingetService>,
+) -> Result<Vec<AvailableUpdate>, String> {
+    let service = service.inner().clone();
+    tauri::async_runtime::spawn_blocking(move || service.list_available_updates())
         .await
         .map_err(|error| error.to_string())?
         .map_err(|error| error.to_string())

@@ -9,6 +9,7 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             winget::winget_search,
             winget::winget_list_installed,
+            winget::winget_list_available_updates,
             winget::winget_install,
             winget::winget_uninstall,
             winget::winget_upgrade

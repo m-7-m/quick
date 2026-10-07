@@ -44,6 +44,14 @@
           ]
         },
         {
+          "name": "winget-list-updates",
+          "cmd": "winget",
+          "args": [
+            "list",
+            "--upgrade-available"
+          ]
+        },
+        {
           "name": "winget-uninstall",
           "cmd": "winget",
           "args": [

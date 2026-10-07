@@ -8,10 +8,20 @@ pub struct Package {
     pub source: Option<String>,
 }
 
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct AvailableUpdate {
+    pub name: String,
+    pub id: String,
+    pub current_version: String,
+    pub available_version: String,
+    pub source: Option<String>,
+}
+
 #[derive(Debug, Clone, Copy)]
 enum TableKind {
     Search,
     List,
+    Upgrade,
 }
 
 #[derive(Debug, Clone)]
@@ -19,6 +29,7 @@ struct Columns {
     name: usize,
     id: usize,
     version: usize,
+    available: Option<usize>,
     source: Option<usize>,
     boundaries: Vec<usize>,
 }
@@ -29,6 +40,21 @@ pub fn parse_search_output(output: &str) -> Vec<Package> {
 
 pub fn parse_list_output(output: &str) -> Vec<Package> {
     parse_packages(output, TableKind::List)
+}
+
+pub fn parse_available_updates_output(output: &str) -> Vec<AvailableUpdate> {
+    let lines = output.lines().collect::<Vec<_>>();
+    let Some((columns, separator_index)) = find_table(&lines, TableKind::Upgrade) else {
+        return Vec::new();
+    };
+    let Some(available_column) = columns.available else {
+        return Vec::new();
+    };
+
+    lines[separator_index + 1..]
+        .iter()
+        .filter_map(|line| parse_update_row(line, &columns, available_column))
+        .collect()
 }
 
 fn parse_packages(output: &str, kind: TableKind) -> Vec<Package> {
@@ -105,6 +131,15 @@ fn identify_columns(header: &str, _kind: TableKind) -> Option<Columns> {
         "Источник",
         "ソース",
     ]);
+    let available = locate(&[
+        "Available",
+        "Disponible",
+        "Verfügbar",
+        "Disponível",
+        "Disponibile",
+        "Доступно",
+        "利用可能",
+    ]);
     let mut boundaries = labels
         .iter()
         .map(|(_, position)| *position)
@@ -116,6 +151,7 @@ fn identify_columns(header: &str, _kind: TableKind) -> Option<Columns> {
         name,
         id,
         version,
+        available,
         source,
         boundaries,
     })
@@ -145,6 +181,46 @@ fn parse_row(line: &str, columns: &Columns) -> Option<Package> {
         name,
         id,
         version,
+        source,
+    })
+}
+
+fn parse_update_row(
+    line: &str,
+    columns: &Columns,
+    available_column: usize,
+) -> Option<AvailableUpdate> {
+    if line.trim().is_empty() || is_separator(line) {
+        return None;
+    }
+    let cell = |start: usize, next: Option<usize>| {
+        let value = slice_chars(line, start, next.unwrap_or(usize::MAX)).trim();
+        (!value.is_empty()).then(|| value.to_owned())
+    };
+    let name = cell(columns.name, next_column(&columns.boundaries, columns.name))?;
+    let id = cell(columns.id, next_column(&columns.boundaries, columns.id))?;
+    let current_version = cell(
+        columns.version,
+        next_column(&columns.boundaries, columns.version),
+    )?;
+    let available_version = cell(
+        available_column,
+        next_column(&columns.boundaries, available_column),
+    )?;
+    if !looks_like_package_id(&id)
+        || !looks_like_version(&current_version)
+        || !looks_like_version(&available_version)
+    {
+        return None;
+    }
+    let source = columns
+        .source
+        .and_then(|start| cell(start, next_column(&columns.boundaries, start)));
+    Some(AvailableUpdate {
+        name,
+        id,
+        current_version,
+        available_version,
         source,
     })
 }
@@ -190,7 +266,10 @@ fn looks_like_version(value: &str) -> bool {
 
 #[cfg(test)]
 mod tests {
-    use super::{Package, parse_list_output, parse_search_output};
+    use super::{
+        AvailableUpdate, Package, parse_available_updates_output, parse_list_output,
+        parse_search_output,
+    };
 
     fn packages(output: &str) -> Vec<Package> {
         parse_search_output(output)
@@ -280,5 +359,25 @@ mod tests {
         let parsed = parse_list_output(output);
         assert_eq!(parsed.len(), 1);
         assert_eq!(parsed[0].source.as_deref(), Some("winget"));
+    }
+
+    #[test]
+    fn parses_available_updates_table() {
+        let output = "Name       Id          Version   Available   Source\n---------------------------------------------------\nGit        Git.Git     2.44.0    2.45.1      winget\n";
+        assert_eq!(
+            parse_available_updates_output(output),
+            vec![AvailableUpdate {
+                name: "Git".into(),
+                id: "Git.Git".into(),
+                current_version: "2.44.0".into(),
+                available_version: "2.45.1".into(),
+                source: Some("winget".into()),
+            }]
+        );
+    }
+
+    #[test]
+    fn returns_no_updates_when_the_upgrade_table_is_missing() {
+        assert!(parse_available_updates_output("No applicable upgrade found.\n").is_empty());
     }
 }

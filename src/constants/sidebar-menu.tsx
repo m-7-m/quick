@@ -1,4 +1,5 @@
 import {
+  IconApps,
   IconRocket,
   IconRotate2,
   IconSearch,
@@ -8,6 +9,7 @@ import {
 
 export const sidebarMenuItems = [
   { label: "Home", href: "/", icon: IconSmartHome },
+  { label: "Installed apps", href: "/apps", icon: IconApps },
   { label: "Search", href: "/search", icon: IconSearch },
   { label: "Updates", href: "/updates", icon: IconRotate2 },
   { label: "Browse", href: "/browse", icon: IconRocket },

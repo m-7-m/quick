@@ -8,17 +8,10 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import { Checkbox } from "@/components/ui/checkbox"
+import { AppsTable } from "@/components/apps-table"
+import { TableSearch } from "@/components/table-search"
 import { UninstallAlert } from "@/components/uninstall-alert"
 import { useWinget } from "@/hooks/use-winget"
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
 
 type InstalledApp = {
   name: string
@@ -33,7 +26,9 @@ export default function InstalledApps() {
   const [isLoadingApps, setIsLoadingApps] = useState(true)
   const [loadError, setLoadError] = useState<string | null>(null)
   const [busyAppId, setBusyAppId] = useState<string | null>(null)
+  const [search, setSearch] = useState("")
   const { remove, isLoading: isRemoving } = useWinget()
+  const selectedAppCount = apps.filter((app) => selectedIds.has(app.id)).length
 
   useEffect(() => {
     let disposed = false
@@ -65,8 +60,18 @@ export default function InstalledApps() {
     })
   }
 
-  function toggleAll(checked: boolean | "indeterminate") {
-    setSelectedIds(checked ? new Set(apps.map((app) => app.id)) : new Set())
+  function toggleAll(
+    checked: boolean | "indeterminate",
+    appIds: string[]
+  ) {
+    setSelectedIds((current) => {
+      const next = new Set(current)
+      for (const id of appIds) {
+        if (checked) next.add(id)
+        else next.delete(id)
+      }
+      return next
+    })
   }
 
   async function uninstallApp(app: InstalledApp) {
@@ -92,82 +97,41 @@ export default function InstalledApps() {
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>Installed apps</CardTitle>
-        <CardDescription>
-          {isLoadingApps
-            ? "Loading installed apps…"
-            : `${apps.length} app${apps.length === 1 ? "" : "s"} installed${selectedIds.size ? ` · ${selectedIds.size} selected` : ""}`}
-        </CardDescription>
+      <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-4">
+        <div className="flex flex-col gap-1">
+          <CardTitle>Installed apps</CardTitle>
+          <CardDescription>
+            {isLoadingApps
+              ? "Loading installed apps…"
+              : `${apps.length} app${apps.length === 1 ? "" : "s"} installed${selectedAppCount ? ` · ${selectedAppCount} selected` : ""}`}
+          </CardDescription>
+        </div>
+        <div className="ml-auto">
+          <TableSearch value={search} onChange={setSearch} />
+        </div>
       </CardHeader>
       <CardContent>
-        {loadError && (
-          <p className="mb-4 text-sm text-destructive" role="alert">
-            Could not load installed apps: {loadError}
-          </p>
-        )}
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-12">
-                <Checkbox
-                  aria-label="Select all installed apps"
-                  checked={apps.length > 0 && selectedIds.size === apps.length}
-                  disabled={isLoadingApps || apps.length === 0}
-                  onCheckedChange={toggleAll}
-                />
-              </TableHead>
-              <TableHead>Name</TableHead>
-              <TableHead>Version</TableHead>
-              <TableHead className="text-right">Action</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {isLoadingApps ? (
-              <TableRow>
-                <TableCell
-                  colSpan={4}
-                  className="py-8 text-center text-muted-foreground"
-                >
-                  Loading installed apps…
-                </TableCell>
-              </TableRow>
-            ) : apps.length === 0 ? (
-              <TableRow>
-                <TableCell
-                  colSpan={4}
-                  className="py-8 text-center text-muted-foreground"
-                >
-                  {loadError
-                    ? "Installed apps could not be loaded."
-                    : "No installed apps found."}
-                </TableCell>
-              </TableRow>
-            ) : (
-              apps.map((app) => (
-                <TableRow key={app.id}>
-                  <TableCell>
-                    <Checkbox
-                      aria-label={`Select ${app.name}`}
-                      checked={selectedIds.has(app.id)}
-                      onCheckedChange={(checked) => toggleApp(app.id, checked)}
-                    />
-                  </TableCell>
-                  <TableCell className="font-medium">{app.name}</TableCell>
-                  <TableCell>{app.version}</TableCell>
-                  <TableCell className="text-right">
-                    <UninstallAlert
-                      appName={app.name}
-                      disabled={isRemoving}
-                      isLoading={busyAppId === app.id}
-                      onConfirm={() => uninstallApp(app)}
-                    />
-                  </TableCell>
-                </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
+        <AppsTable
+          apps={apps}
+          emptyMessage="No installed apps found."
+          isLoading={isLoadingApps}
+          loadError={loadError}
+          loadErrorEmptyMessage="Installed apps could not be loaded."
+          loadErrorMessage="Could not load installed apps"
+          loadingMessage="Loading installed apps…"
+          onAppSelectionChange={toggleApp}
+          onSelectAllChange={toggleAll}
+          renderAction={(app) => (
+            <UninstallAlert
+              appName={app.name}
+              disabled={isRemoving}
+              isLoading={busyAppId === app.id}
+              onConfirm={() => uninstallApp(app)}
+            />
+          )}
+          selectedIds={selectedIds}
+          search={search}
+        />
       </CardContent>
     </Card>
   )

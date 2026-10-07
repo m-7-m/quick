@@ -9,7 +9,6 @@ import {
 import { HomeCards } from "@/constants/home-cards"
 import { cn } from "cn"
 import { Link } from "wouter"
-import InstalledApps from "@/components/installed-apps"
 
 export default function HomePage() {
   return (
@@ -40,7 +39,6 @@ export default function HomePage() {
           </Link>
         ))}
       </div>
-      <InstalledApps />
     </div>
   )
 }

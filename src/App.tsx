@@ -6,6 +6,7 @@ import { Toaster } from "@/components/ui/sonner"
 import SearchPage from "./pages/search"
 import UpdatesPage from "./pages/updates"
 import BrowsePage from "./pages/browse"
+import AppsPage from "./pages/apps"
 
 export function App() {
   return (
@@ -14,6 +15,7 @@ export function App() {
       <main className="min-h-screen w-full bg-linear-to-br from-primary/10 to-background p-8">
         <Switch>
           <Route path="/" component={HomePage} />
+          <Route path="/apps" component={AppsPage} />
           <Route path="/search" component={SearchPage} />
           <Route path="/updates" component={UpdatesPage} />
           <Route path="/browse" component={BrowsePage} />
