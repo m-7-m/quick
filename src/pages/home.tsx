@@ -23,9 +23,21 @@ export default function HomePage() {
             <Card
               className={cn(
                 card.outline,
-                "transition-all hover:outline-2 hover:outline-offset-6"
+                "relative overflow-hidden transition-all hover:outline-2 hover:outline-offset-6"
               )}
             >
+              <div
+                className={cn(
+                  card.background,
+                  "absolute -top-12/12 left-1/2 h-20 w-20 -translate-x-1/2 rounded-full blur-3xl"
+                )}
+              ></div>
+              <div
+                className={cn(
+                  card.background,
+                  "absolute -bottom-12/12 left-1/2 h-20 w-20 -translate-x-1/2 rounded-full blur-3xl"
+                )}
+              ></div>
               <CardHeader>
                 <CardTitle>{card.title}</CardTitle>
                 <CardDescription>{card.desc}</CardDescription>

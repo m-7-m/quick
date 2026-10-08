@@ -13,6 +13,7 @@ export const HomeCards = [
     href: "/search",
     outline: "outline-emerald-500",
     iconClass: "bg-emerald-500/10 text-emerald-500",
+    background: "bg-emerald-500",
   },
   {
     title: "Update",
@@ -21,6 +22,7 @@ export const HomeCards = [
     href: "/updates",
     outline: "outline-sky-500",
     iconClass: "bg-sky-500/10 text-sky-500",
+    background: "bg-sky-500",
   },
   {
     title: "Remove",
@@ -29,6 +31,7 @@ export const HomeCards = [
     href: "/apps",
     outline: "outline-rose-500",
     iconClass: "bg-rose-500/10 text-rose-500",
+    background: "bg-rose-500",
   },
   {
     title: "Browse",
@@ -37,5 +40,6 @@ export const HomeCards = [
     href: "/browse",
     outline: "outline-indigo-500",
     iconClass: "bg-indigo-500/10 text-indigo-500",
+    background: "bg-indigo-500",
   },
 ]

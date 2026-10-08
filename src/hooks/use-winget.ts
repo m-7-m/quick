@@ -1,10 +1,18 @@
 import { useCallback, useState } from "react"
+import { invoke } from "@tauri-apps/api/core"
 import {
   installApp,
   removeApp,
   updateAllApps,
   updateApp,
 } from "@/lib/setup/winget"
+
+export type WingetPackage = {
+  name: string
+  id: string
+  version: string
+  source: string | null
+}
 
 function errorMessage(error: unknown): string {
   return error instanceof Error ? error.message : String(error)
@@ -32,6 +40,13 @@ export function useWinget() {
     (id: string) => runOperation(() => installApp(id)),
     [runOperation]
   )
+  const searchApps = useCallback(
+    (query: string) =>
+      runOperation(() =>
+        invoke<WingetPackage[]>("winget_search", { query })
+      ),
+    [runOperation]
+  )
   const update = useCallback(
     (id: string) => runOperation(() => updateApp(id)),
     [runOperation]
@@ -46,5 +61,14 @@ export function useWinget() {
   )
   const clearError = useCallback(() => setError(null), [])
 
-  return { install, update, updateAll, remove, isLoading, error, clearError }
+  return {
+    install,
+    searchApps,
+    update,
+    updateAll,
+    remove,
+    isLoading,
+    error,
+    clearError,
+  }
 }
