@@ -22,13 +22,11 @@ type InstalledApp = {
 
 export default function InstalledApps() {
   const [apps, setApps] = useState<InstalledApp[]>([])
-  const [selectedIds, setSelectedIds] = useState<Set<string>>(() => new Set())
   const [isLoadingApps, setIsLoadingApps] = useState(true)
   const [loadError, setLoadError] = useState<string | null>(null)
   const [busyAppId, setBusyAppId] = useState<string | null>(null)
   const [search, setSearch] = useState("")
   const { remove, isLoading: isRemoving } = useWinget()
-  const selectedAppCount = apps.filter((app) => selectedIds.has(app.id)).length
 
   useEffect(() => {
     let disposed = false
@@ -51,29 +49,6 @@ export default function InstalledApps() {
     }
   }, [])
 
-  function toggleApp(id: string, checked: boolean | "indeterminate") {
-    setSelectedIds((current) => {
-      const next = new Set(current)
-      if (checked) next.add(id)
-      else next.delete(id)
-      return next
-    })
-  }
-
-  function toggleAll(
-    checked: boolean | "indeterminate",
-    appIds: string[]
-  ) {
-    setSelectedIds((current) => {
-      const next = new Set(current)
-      for (const id of appIds) {
-        if (checked) next.add(id)
-        else next.delete(id)
-      }
-      return next
-    })
-  }
-
   async function uninstallApp(app: InstalledApp) {
     setBusyAppId(app.id)
     try {
@@ -81,11 +56,6 @@ export default function InstalledApps() {
       setApps((current) =>
         current.filter((installedApp) => installedApp.id !== app.id)
       )
-      setSelectedIds((current) => {
-        const next = new Set(current)
-        next.delete(app.id)
-        return next
-      })
       toast.success(`${app.name} uninstalled successfully.`)
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : String(error)
@@ -103,7 +73,7 @@ export default function InstalledApps() {
           <CardDescription>
             {isLoadingApps
               ? "Loading installed apps…"
-              : `${apps.length} app${apps.length === 1 ? "" : "s"} installed${selectedAppCount ? ` · ${selectedAppCount} selected` : ""}`}
+              : `${apps.length} app${apps.length === 1 ? "" : "s"} installed`}
           </CardDescription>
         </div>
         <div className="ml-auto">
@@ -119,8 +89,6 @@ export default function InstalledApps() {
           loadErrorEmptyMessage="Installed apps could not be loaded."
           loadErrorMessage="Could not load installed apps"
           loadingMessage="Loading installed apps…"
-          onAppSelectionChange={toggleApp}
-          onSelectAllChange={toggleAll}
           renderAction={(app) => (
             <UninstallAlert
               appName={app.name}
@@ -129,7 +97,6 @@ export default function InstalledApps() {
               onConfirm={() => uninstallApp(app)}
             />
           )}
-          selectedIds={selectedIds}
           search={search}
         />
       </CardContent>

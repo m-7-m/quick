@@ -1,5 +1,4 @@
 import type { ReactNode } from "react"
-import { Checkbox } from "@/components/ui/checkbox"
 import {
   Table,
   TableBody,
@@ -23,15 +22,6 @@ type AppsTableProps<T extends AppTableItem> = {
   loadErrorMessage?: string
   loadErrorEmptyMessage?: string
   loadingMessage?: string
-  selectedIds?: ReadonlySet<string>
-  onAppSelectionChange?: (
-    id: string,
-    checked: boolean | "indeterminate"
-  ) => void
-  onSelectAllChange?: (
-    checked: boolean | "indeterminate",
-    appIds: string[]
-  ) => void
   renderAction?: (app: T) => ReactNode
   renderVersion?: (app: T) => ReactNode
   emptyMessage?: string
@@ -45,9 +35,6 @@ export function AppsTable<T extends AppTableItem>({
   loadErrorMessage = "Could not load apps",
   loadErrorEmptyMessage = "Apps could not be loaded.",
   loadingMessage = "Loading apps…",
-  selectedIds,
-  onAppSelectionChange,
-  onSelectAllChange,
   renderAction,
   renderVersion,
   emptyMessage = "No apps found.",
@@ -59,13 +46,6 @@ export function AppsTable<T extends AppTableItem>({
       ({ app }) =>
         !normalizedSearch || app.name.toLowerCase().includes(normalizedSearch)
     )
-  const appIds = apps.map((app) => app.id)
-  const hasSelection = selectedIds !== undefined && onAppSelectionChange
-  const allRowsSelected =
-    appIds.length > 0 && appIds.every((id) => selectedIds?.has(id))
-  const someRowsSelected =
-    appIds.some((id) => selectedIds?.has(id)) && !allRowsSelected
-
   return (
     <>
       {loadError && (
@@ -76,20 +56,8 @@ export function AppsTable<T extends AppTableItem>({
       <Table>
         <TableHeader>
           <TableRow data-state="header">
-            {hasSelection && (
-              <TableHead scope="col" className="w-12">
-                <Checkbox
-                  aria-label="Select all apps"
-                  checked={allRowsSelected}
-                  indeterminate={someRowsSelected}
-                  disabled={isLoading || appIds.length === 0}
-                  onCheckedChange={(checked) =>
-                    onSelectAllChange?.(checked, appIds)
-                  }
-                />
-              </TableHead>
-            )}
             <TableHead scope="col">Name</TableHead>
+            <TableHead scope="col">App ID</TableHead>
             <TableHead scope="col">Version</TableHead>
             {renderAction && (
               <TableHead scope="col" className="text-right">
@@ -102,7 +70,7 @@ export function AppsTable<T extends AppTableItem>({
           {isLoading ? (
             <TableRow>
               <TableCell
-                colSpan={2 + (hasSelection ? 1 : 0) + (renderAction ? 1 : 0)}
+                colSpan={3 + (renderAction ? 1 : 0)}
                 className="py-8 text-center text-muted-foreground"
               >
                 {loadingMessage}
@@ -111,7 +79,7 @@ export function AppsTable<T extends AppTableItem>({
           ) : filteredApps.length === 0 ? (
             <TableRow>
               <TableCell
-                colSpan={2 + (hasSelection ? 1 : 0) + (renderAction ? 1 : 0)}
+                colSpan={3 + (renderAction ? 1 : 0)}
                 className="py-8 text-center text-muted-foreground"
               >
                 {loadError
@@ -124,18 +92,8 @@ export function AppsTable<T extends AppTableItem>({
           ) : (
             filteredApps.map(({ app, key }) => (
               <TableRow key={key}>
-                {hasSelection && (
-                  <TableCell>
-                    <Checkbox
-                      aria-label={`Select ${app.name}`}
-                      checked={selectedIds.has(app.id)}
-                      onCheckedChange={(checked) =>
-                        onAppSelectionChange(app.id, checked)
-                      }
-                    />
-                  </TableCell>
-                )}
                 <TableCell className="font-medium">{app.name}</TableCell>
+                <TableCell>{app.id}</TableCell>
                 <TableCell>
                   {renderVersion ? renderVersion(app) : app.version}
                 </TableCell>
