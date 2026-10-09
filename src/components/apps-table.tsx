@@ -7,6 +7,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import { AppsIcon } from "@/components/apps-icon"
 
 export type AppTableItem = {
   id: string
@@ -92,7 +93,12 @@ export function AppsTable<T extends AppTableItem>({
           ) : (
             filteredApps.map(({ app, key }) => (
               <TableRow key={key}>
-                <TableCell className="font-medium">{app.name}</TableCell>
+                <TableCell className="font-medium">
+                  <div className="flex items-center gap-3">
+                    <AppsIcon appName={app.name} />
+                    <span>{app.name}</span>
+                  </div>
+                </TableCell>
                 <TableCell>{app.id}</TableCell>
                 <TableCell>
                   {renderVersion ? renderVersion(app) : app.version}
