@@ -1,6 +1,6 @@
 import { Command } from "@tauri-apps/plugin-shell"
 
-const packageIdPattern = /^[A-Za-z0-9._-]+$/
+const packageIdPattern = /^[A-Za-z0-9._+-]+$/
 
 type WingetCommand =
   | "winget-install"
