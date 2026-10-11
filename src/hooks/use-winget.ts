@@ -6,6 +6,10 @@ import {
   updateAllApps,
   updateApp,
 } from "@/lib/setup/winget"
+import {
+  invalidateAvailableUpdatesCache,
+  invalidateInstalledAppsCache,
+} from "@/lib/winget-cache"
 
 export type WingetPackage = {
   name: string
@@ -37,7 +41,12 @@ export function useWinget() {
   }, [])
 
   const install = useCallback(
-    (id: string) => runOperation(() => installApp(id)),
+    (id: string) =>
+      runOperation(async () => {
+        await installApp(id)
+        invalidateInstalledAppsCache()
+        invalidateAvailableUpdatesCache()
+      }),
     [runOperation]
   )
   const searchApps = useCallback(
@@ -48,15 +57,30 @@ export function useWinget() {
     [runOperation]
   )
   const update = useCallback(
-    (id: string) => runOperation(() => updateApp(id)),
+    (id: string) =>
+      runOperation(async () => {
+        await updateApp(id)
+        invalidateInstalledAppsCache()
+        invalidateAvailableUpdatesCache()
+      }),
     [runOperation]
   )
   const updateAll = useCallback(
-    () => runOperation(updateAllApps),
+    () =>
+      runOperation(async () => {
+        await updateAllApps()
+        invalidateInstalledAppsCache()
+        invalidateAvailableUpdatesCache()
+      }),
     [runOperation]
   )
   const remove = useCallback(
-    (id: string) => runOperation(() => removeApp(id)),
+    (id: string) =>
+      runOperation(async () => {
+        await removeApp(id)
+        invalidateInstalledAppsCache()
+        invalidateAvailableUpdatesCache()
+      }),
     [runOperation]
   )
   const clearError = useCallback(() => setError(null), [])

@@ -1,4 +1,3 @@
-import { invoke } from "@tauri-apps/api/core"
 import { useEffect, useState } from "react"
 import { toast } from "sonner"
 import {
@@ -12,17 +11,17 @@ import { AppsTable } from "@/components/apps-table"
 import { TableSearch } from "@/components/table-search"
 import { UninstallAlert } from "@/components/uninstall-alert"
 import { useWinget } from "@/hooks/use-winget"
-
-type InstalledApp = {
-  name: string
-  id: string
-  version: string
-  source: string | null
-}
+import {
+  getCachedInstalledApps,
+  loadInstalledApps,
+  setCachedInstalledApps,
+  type InstalledApp,
+} from "@/lib/winget-cache"
 
 export default function InstalledApps() {
-  const [apps, setApps] = useState<InstalledApp[]>([])
-  const [isLoadingApps, setIsLoadingApps] = useState(true)
+  const cachedApps = getCachedInstalledApps()
+  const [apps, setApps] = useState<InstalledApp[]>(cachedApps ?? [])
+  const [isLoadingApps, setIsLoadingApps] = useState(cachedApps === undefined)
   const [loadError, setLoadError] = useState<string | null>(null)
   const [busyAppId, setBusyAppId] = useState<string | null>(null)
   const [search, setSearch] = useState("")
@@ -31,9 +30,12 @@ export default function InstalledApps() {
   useEffect(() => {
     let disposed = false
 
-    void invoke<InstalledApp[]>("winget_list_installed")
+    void loadInstalledApps()
       .then((installedApps) => {
-        if (!disposed) setApps(installedApps)
+        if (!disposed) {
+          setApps(installedApps)
+          setLoadError(null)
+        }
       })
       .catch((error: unknown) => {
         if (!disposed) {
@@ -53,9 +55,11 @@ export default function InstalledApps() {
     setBusyAppId(app.id)
     try {
       await remove(app.id)
-      setApps((current) =>
-        current.filter((installedApp) => installedApp.id !== app.id)
+      const remainingApps = apps.filter(
+        (installedApp) => installedApp.id !== app.id
       )
+      setApps(remainingApps)
+      setCachedInstalledApps(remainingApps)
       toast.success(`${app.name} uninstalled successfully.`)
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : String(error)

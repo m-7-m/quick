@@ -1,4 +1,3 @@
-import { invoke } from "@tauri-apps/api/core"
 import { useEffect, useState } from "react"
 import { toast } from "sonner"
 import { AppsTable } from "@/components/apps-table"
@@ -13,18 +12,20 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { useWinget } from "@/hooks/use-winget"
-
-type AvailableUpdate = {
-  name: string
-  id: string
-  current_version: string
-  available_version: string
-  source: string | null
-}
+import {
+  getCachedAvailableUpdates,
+  loadAvailableUpdates,
+  type AvailableUpdate,
+} from "@/lib/winget-cache"
 
 export default function UpdatesPage() {
-  const [updates, setUpdates] = useState<AvailableUpdate[]>([])
-  const [isLoadingUpdates, setIsLoadingUpdates] = useState(true)
+  const cachedUpdates = getCachedAvailableUpdates()
+  const [updates, setUpdates] = useState<AvailableUpdate[]>(
+    cachedUpdates ?? []
+  )
+  const [isLoadingUpdates, setIsLoadingUpdates] = useState(
+    cachedUpdates === undefined
+  )
   const [loadError, setLoadError] = useState<string | null>(null)
   const [reloadVersion, setReloadVersion] = useState(0)
   const [busyAppId, setBusyAppId] = useState<string | null>(null)
@@ -34,7 +35,7 @@ export default function UpdatesPage() {
   useEffect(() => {
     let disposed = false
 
-    void invoke<AvailableUpdate[]>("winget_list_available_updates")
+    void loadAvailableUpdates(reloadVersion > 0)
       .then((availableUpdates) => {
         if (!disposed) setUpdates(availableUpdates)
       })
