@@ -15,7 +15,8 @@ export function AppIcon({ appName, className = "size-10" }: AppIconProps) {
   const [iconStatus, setIconStatus] = useState<IconStatus | null>(null)
   const name = appName.trim()
   const iconUrl = name
-    ? `https://www.faviconapi.com/${encodeURIComponent(name)}`
+    ? `
+https://www.faviconapi.com/WzEsImRhc2hib2FyZGljb25zIixbInN2Z2wiLCJ0aGVzdmciLCJzZWxmaHN0IiwiZ29vZ2xldjIiXSwxMjhd/${encodeURIComponent(name)}`
     : undefined
 
   useEffect(() => {
