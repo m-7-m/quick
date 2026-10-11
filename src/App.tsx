@@ -12,7 +12,7 @@ export function App() {
   return (
     <SidebarProvider>
       <AppSidebar />
-      <main className="min-h-screen w-full bg-linear-to-br from-primary/10 to-background p-8">
+      <main className="min-h-screen w-full overflow-x-hidden bg-linear-to-br from-primary/10 to-background p-8">
         <Switch>
           <Route path="/" component={HomePage} />
           <Route path="/apps" component={AppsPage} />

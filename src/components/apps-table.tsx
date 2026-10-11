@@ -96,10 +96,10 @@ export function AppsTable<T extends AppTableItem>({
                 <TableCell className="font-medium">
                   <div className="flex items-center gap-3">
                     <AppsIcon appName={app.name} />
-                    <span>{app.name}</span>
+                    <span className="">{app.name}</span>
                   </div>
                 </TableCell>
-                <TableCell>{app.id}</TableCell>
+                <TableCell className="max-w-20 truncate">{app.id}</TableCell>
                 <TableCell>
                   {renderVersion ? renderVersion(app) : app.version}
                 </TableCell>
