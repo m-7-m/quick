@@ -1,5 +1,11 @@
 import { useEffect, useState } from "react"
-import { IconPlus } from "@tabler/icons-react"
+import {
+  IconFileImport,
+  IconFileExport,
+  IconPlus,
+} from "@tabler/icons-react"
+import { open, save } from "@tauri-apps/plugin-dialog"
+import { readTextFile, writeTextFile } from "@tauri-apps/plugin-fs"
 import { toast } from "sonner"
 import ProfileCard from "@/components/profile-card"
 import CreateProfileDialog from "@/components/create-profile-dialog"
@@ -8,7 +14,9 @@ import Header from "@/components/header"
 import { useWinget } from "@/hooks/use-winget"
 import {
   loadCustomProfiles,
+  parseCustomProfiles,
   saveCustomProfiles,
+  serializeCustomProfiles,
 } from "@/lib/custom-profiles"
 import { Button } from "@/components/ui/button"
 
@@ -24,10 +32,26 @@ function errorMessage(error: unknown): string {
 }
 
 export default function ProfilesPage() {
-  const [customProfiles, setCustomProfiles] = useState<AppProfile[]>([])
-  const [profilesLoaded, setProfilesLoaded] = useState(false)
+  const [initialProfiles] = useState(() => {
+    try {
+      return { profiles: loadCustomProfiles(), error: null }
+    } catch (error: unknown) {
+      return { profiles: [], error: errorMessage(error) }
+    }
+  })
+  const [customProfiles, setCustomProfiles] = useState<AppProfile[]>(
+    initialProfiles.profiles
+  )
   const [selectedApps, setSelectedApps] =
-    useState<Record<string, Set<string>>>(initialSelectedApps)
+    useState<Record<string, Set<string>>>(() => ({
+      ...initialSelectedApps,
+      ...Object.fromEntries(
+        initialProfiles.profiles.map((profile) => [
+          profile.name,
+          new Set(profile.apps.map((app) => app.id)),
+        ])
+      ),
+    }))
   const [busyProfile, setBusyProfile] = useState<string | null>(null)
   const [installProgress, setInstallProgress] = useState<{
     current: number
@@ -36,24 +60,10 @@ export default function ProfilesPage() {
   const { install } = useWinget()
 
   useEffect(() => {
-    try {
-      const storedProfiles = loadCustomProfiles()
-      setCustomProfiles(storedProfiles)
-      setSelectedApps((current) => ({
-        ...current,
-        ...Object.fromEntries(
-          storedProfiles.map((profile) => [
-            profile.name,
-            new Set(profile.apps.map((app) => app.id)),
-          ])
-        ),
-      }))
-    } catch (error: unknown) {
-      toast.error(`Could not load custom profiles: ${errorMessage(error)}`)
-    } finally {
-      setProfilesLoaded(true)
+    if (initialProfiles.error) {
+      toast.error(`Could not load custom profiles: ${initialProfiles.error}`)
     }
-  }, [])
+  }, [initialProfiles.error])
 
   function saveProfiles(nextProfiles: AppProfile[]): boolean {
     try {
@@ -63,6 +73,79 @@ export default function ProfilesPage() {
     } catch (error: unknown) {
       toast.error(`Could not save custom profiles: ${errorMessage(error)}`)
       return false
+    }
+  }
+
+  async function exportProfiles() {
+    try {
+      const filePath = await save({
+        defaultPath: "quick-custom-profiles.json",
+        filters: [{ name: "JSON", extensions: ["json"] }],
+      })
+      if (!filePath) return
+
+      await writeTextFile(filePath, serializeCustomProfiles(customProfiles))
+      toast.success(
+        `Exported ${customProfiles.length} custom profile${customProfiles.length === 1 ? "" : "s"}.`
+      )
+    } catch (error: unknown) {
+      toast.error(`Could not export custom profiles: ${errorMessage(error)}`)
+    }
+  }
+
+  async function importProfiles() {
+    try {
+      const filePath = await open({
+        multiple: false,
+        filters: [{ name: "JSON", extensions: ["json"] }],
+      })
+      if (typeof filePath !== "string") return
+
+      const importedProfiles = parseCustomProfiles(
+        await readTextFile(filePath)
+      )
+      if (importedProfiles.length === 0) {
+        toast.error("The selected file does not contain any custom profiles.")
+        return
+      }
+
+      const existingNames = new Set(
+        [...AppProfiles, ...customProfiles].map((profile) =>
+          profile.name.trim().toLowerCase()
+        )
+      )
+      const profilesToImport = importedProfiles
+        .map((profile) => ({ ...profile, name: profile.name.trim() }))
+        .filter((profile) => {
+          const normalizedName = profile.name.toLowerCase()
+          if (existingNames.has(normalizedName)) return false
+          existingNames.add(normalizedName)
+          return true
+        })
+
+      if (profilesToImport.length === 0) {
+        toast.error("No profiles imported. All profile names already exist.")
+        return
+      }
+
+      const nextProfiles = [...customProfiles, ...profilesToImport]
+      if (!saveProfiles(nextProfiles)) return
+
+      setSelectedApps((current) => ({
+        ...current,
+        ...Object.fromEntries(
+          profilesToImport.map((profile) => [
+            profile.name,
+            new Set(profile.apps.map((app) => app.id)),
+          ])
+        ),
+      }))
+      const skippedCount = importedProfiles.length - profilesToImport.length
+      toast.success(
+        `Imported ${profilesToImport.length} custom profile${profilesToImport.length === 1 ? "" : "s"}${skippedCount > 0 ? `; skipped ${skippedCount} with duplicate names` : ""}.`
+      )
+    } catch (error: unknown) {
+      toast.error(`Could not import custom profiles: ${errorMessage(error)}`)
     }
   }
 
@@ -180,12 +263,30 @@ export default function ProfilesPage() {
         title="Profiles"
         desc="Choose apps to install from each profile"
       />
-      <div className="flex justify-end">
+      <div className="flex flex-wrap justify-end gap-2">
+        <Button
+          disabled={busyProfile !== null}
+          onClick={() => void importProfiles()}
+          variant="outline"
+        >
+          <IconFileImport aria-hidden="true" />
+          Import profiles
+        </Button>
+        <Button
+          disabled={
+            busyProfile !== null || customProfiles.length === 0
+          }
+          onClick={() => void exportProfiles()}
+          variant="outline"
+        >
+          <IconFileExport aria-hidden="true" />
+          Export profiles
+        </Button>
         <CreateProfileDialog
-          disabled={!profilesLoaded || busyProfile !== null}
+          disabled={busyProfile !== null}
           onCreate={createProfile}
           trigger={
-            <Button disabled={!profilesLoaded || busyProfile !== null}>
+            <Button disabled={busyProfile !== null}>
               <IconPlus aria-hidden="true" />
               Create profile
             </Button>

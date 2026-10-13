@@ -4,6 +4,8 @@ pub mod winget_parser;
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
+        .plugin(tauri_plugin_dialog::init())
+        .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_shell::init())
         .manage(winget::WingetService::new())
         .invoke_handler(tauri::generate_handler![
