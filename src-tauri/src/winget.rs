@@ -146,7 +146,7 @@ impl WingetService {
 
     fn run_capture(&self, args: &[&str]) -> Result<String, WingetError> {
         let executable = resolve_winget()?;
-        let output = Command::new(executable)
+        let output = winget_command(executable)
             .args(args)
             .arg("--disable-interactivity")
             .output()?;
@@ -167,7 +167,7 @@ impl WingetService {
         progress: impl Fn(WingetProgressEvent) -> Result<(), String> + Send + Sync + 'static,
     ) -> Result<(), WingetError> {
         let executable = resolve_winget()?;
-        let mut child = Command::new(executable)
+        let mut child = winget_command(executable)
             .args(args)
             .stdout(Stdio::piped())
             .stderr(Stdio::piped())
@@ -212,6 +212,17 @@ impl WingetService {
         }
         Ok(())
     }
+}
+
+fn winget_command(executable: PathBuf) -> Command {
+    let mut command = Command::new(executable);
+    #[cfg(windows)]
+    {
+        use std::os::windows::process::CommandExt;
+        const CREATE_NO_WINDOW: u32 = 0x08000000;
+        command.creation_flags(CREATE_NO_WINDOW);
+    }
+    command
 }
 
 impl Default for WingetService {
