@@ -25,7 +25,7 @@ export const BrowseCategories: BrowseCategory[] = [
     apps: [
       { name: "Discord", id: "Discord.Discord" },
       { name: "Telegram", id: "Telegram.TelegramDesktop" },
-      { name: "WhatsApp", id: "WhatsApp.WhatsApp" },
+      { name: "WhatsApp", id: "9NKSQGP7F2NH" },
       { name: "Signal", id: "OpenWhisperSystems.Signal" },
       { name: "Slack", id: "SlackTechnologies.Slack" },
       { name: "Zoom", id: "Zoom.Zoom" },

@@ -1,3 +1,5 @@
+import { IconRefresh } from "@tabler/icons-react"
+import { Button } from "./ui/button"
 import { SidebarTrigger } from "./ui/sidebar"
 
 export default function Header({
@@ -13,7 +15,13 @@ export default function Header({
         <h2 className="text-3xl font-semibold">{title}</h2>
         <p className="text-sm text-muted-foreground">{desc}</p>
       </div>
-      <SidebarTrigger className="flex md:hidden" />
+      <div className="flex items-center gap-4">
+        <Button variant="outline" onClick={() => window.location.reload()}>
+          <IconRefresh />
+          <span>Refresh</span>
+        </Button>
+        <SidebarTrigger className="flex md:hidden" />
+      </div>
     </div>
   )
 }
