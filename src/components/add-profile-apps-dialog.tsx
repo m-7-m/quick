@@ -138,7 +138,11 @@ export default function AddProfileAppsDialog({
                     className="flex items-center gap-3 border-b py-3 last:border-b-0"
                     key={app.id}
                   >
-                    <AppIcon appName={app.name} className="size-6 shrink-0" />
+                    <AppIcon
+                      appId={app.id}
+                      appName={app.name}
+                      className="size-6 shrink-0"
+                    />
                     <span className="flex min-w-0 flex-1 flex-col">
                       <span className="truncate text-sm font-medium">
                         {app.name}

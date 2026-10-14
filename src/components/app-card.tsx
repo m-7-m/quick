@@ -27,7 +27,7 @@ export default function AppCard({
     <Card size="sm">
       <CardHeader className="flex w-full items-center justify-between">
         <div className="flex items-center gap-4">
-          <AppIcon appName={app.name} />
+          <AppIcon appId={app.id} appName={app.name} />
           <div>
             <CardTitle className="mt-2 truncate">{app.name}</CardTitle>
             <CardDescription className="max-w-30 truncate text-xs">

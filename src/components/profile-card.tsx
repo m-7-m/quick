@@ -110,7 +110,7 @@ export default function ProfileCard({
                         onToggleApp(app.id, checked === true)
                       }
                     />
-                    <AppIcon appName={app.name} className="size-6" />
+                    <AppIcon appId={app.id} appName={app.name} className="size-6" />
                     <span className="flex min-w-0 flex-col">
                       <span className="truncate text-sm font-medium">
                         {app.name}

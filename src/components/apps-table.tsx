@@ -95,7 +95,7 @@ export function AppsTable<T extends AppTableItem>({
               <TableRow key={key}>
                 <TableCell className="font-medium">
                   <div className="flex items-center gap-3">
-                    <AppsIcon appName={app.name} />
+                    <AppsIcon appId={app.id} appName={app.name} />
                     <span className="">{app.name}</span>
                   </div>
                 </TableCell>
