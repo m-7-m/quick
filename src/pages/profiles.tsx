@@ -207,6 +207,24 @@ export default function ProfilesPage() {
     })
   }
 
+  function removeAppFromProfile(profileName: string, appId: string) {
+    const nextProfiles = customProfiles.map((profile) =>
+      profile.name === profileName
+        ? {
+            ...profile,
+            apps: profile.apps.filter((app) => app.id !== appId),
+          }
+        : profile
+    )
+    if (!saveProfiles(nextProfiles)) return
+
+    setSelectedApps((current) => {
+      const nextSelection = new Set(current[profileName] ?? [])
+      nextSelection.delete(appId)
+      return { ...current, [profileName]: nextSelection }
+    })
+  }
+
   function toggleApp(profileName: string, appId: string, checked: boolean) {
     setSelectedApps((current) => {
       const nextSelection = new Set(current[profileName] ?? [])
@@ -307,6 +325,9 @@ export default function ProfilesPage() {
               busyProfile === profile.name ? installProgress : null
             }
             onAddApps={(apps) => addAppsToProfile(profile.name, apps)}
+            onRemoveApp={(appId) =>
+              removeAppFromProfile(profile.name, appId)
+            }
             onToggleApp={(appId, checked) =>
               toggleApp(profile.name, appId, checked)
             }

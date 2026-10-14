@@ -1,4 +1,8 @@
-import { IconChevronDown, IconDownload } from "@tabler/icons-react"
+import {
+  IconChevronDown,
+  IconDownload,
+  IconTrash,
+} from "@tabler/icons-react"
 import { AppIcon } from "@/components/app-icon"
 import AddProfileAppsDialog from "@/components/add-profile-apps-dialog"
 import DeleteProfileDialog from "@/components/delete-profile-dialog"
@@ -27,6 +31,7 @@ type ProfileCardProps = {
   installProgress: { current: number; total: number } | null
   onAddApps: (apps: AppProfile["apps"]) => void
   onDelete: () => void
+  onRemoveApp: (appId: string) => void
   onToggleApp: (appId: string, checked: boolean) => void
   onInstall: () => void
 }
@@ -40,6 +45,7 @@ export default function ProfileCard({
   installProgress,
   onAddApps,
   onDelete,
+  onRemoveApp,
   onToggleApp,
   onInstall,
 }: ProfileCardProps) {
@@ -92,27 +98,41 @@ export default function ProfileCard({
               </p>
             ) : (
               profile.apps.map((app) => (
-                <label
+                <div
                   className="flex min-w-0 cursor-pointer items-center gap-3 rounded-md p-2 hover:bg-muted/50"
                   key={app.id}
                 >
-                  <Checkbox
-                    checked={selectedAppIds.has(app.id)}
-                    disabled={isDisabled}
-                    onCheckedChange={(checked) =>
-                      onToggleApp(app.id, checked === true)
-                    }
-                  />
-                  <AppIcon appName={app.name} className="size-6" />
-                  <span className="flex min-w-0 flex-col">
-                    <span className="truncate text-sm font-medium">
-                      {app.name}
+                  <label className="flex min-w-0 flex-1 cursor-pointer items-center gap-3">
+                    <Checkbox
+                      checked={selectedAppIds.has(app.id)}
+                      disabled={isDisabled}
+                      onCheckedChange={(checked) =>
+                        onToggleApp(app.id, checked === true)
+                      }
+                    />
+                    <AppIcon appName={app.name} className="size-6" />
+                    <span className="flex min-w-0 flex-col">
+                      <span className="truncate text-sm font-medium">
+                        {app.name}
+                      </span>
+                      <span className="truncate text-xs text-muted-foreground">
+                        {app.id}
+                      </span>
                     </span>
-                    <span className="truncate text-xs text-muted-foreground">
-                      {app.id}
-                    </span>
-                  </span>
-                </label>
+                  </label>
+                  {isCustom && (
+                    <Button
+                      aria-label={`Remove ${app.name} from profile`}
+                      disabled={isDisabled}
+                      onClick={() => onRemoveApp(app.id)}
+                      size="icon"
+                      type="button"
+                      variant="destructive"
+                    >
+                      <IconTrash aria-hidden="true" />
+                    </Button>
+                  )}
+                </div>
               ))
             )}
           </CardContent>
