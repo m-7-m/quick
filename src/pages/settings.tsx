@@ -21,7 +21,9 @@ export default function SettingsPage() {
       })
       .catch((error: unknown) => {
         if (!disposed) {
-          setVersionError(error instanceof Error ? error.message : String(error))
+          setVersionError(
+            error instanceof Error ? error.message : String(error)
+          )
         }
       })
 
@@ -43,6 +45,16 @@ export default function SettingsPage() {
         <AboutCard appVersion={appVersion} versionError={versionError} />
         <AppUpdatesCard appVersion={appVersion} />
       </div>
+      <p className="text-center text-sm text-muted-foreground">
+        Made with ❤️ by{" "}
+        <a
+          className="text-primary underline"
+          target="_blank"
+          href="https://m-7-m.com"
+        >
+          m-7-m
+        </a>
+      </p>
     </div>
   )
 }
