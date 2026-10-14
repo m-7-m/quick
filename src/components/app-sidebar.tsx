@@ -20,12 +20,14 @@ export function AppSidebar() {
   const location = useLocation()
 
   return (
-    <Sidebar className="bg-background!">
+    <Sidebar collapsible="icon">
       <SidebarHeader>
         <SidebarMenu>
-          <SidebarMenuItem className="flex items-center gap-2 p-4">
-            <img src="/quick.svg" alt="Quick Logo" className="size-8" />
-            <h3 className="text-2xl font-semibold">Quick</h3>
+          <SidebarMenuItem>
+            <SidebarMenuButton>
+              <img src="/quick.svg" alt="Quick Logo" className="size-8" />
+              <h3 className="text-2xl font-semibold">Quick</h3>
+            </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
