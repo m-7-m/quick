@@ -22,10 +22,23 @@ export function AppSidebar() {
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton>
-              <img src="/quick.svg" alt="Quick Logo" className="size-8" />
-              <h3 className="text-2xl font-semibold">Quick</h3>
-            </SidebarMenuButton>
+            <SidebarMenuButton
+              size="lg"
+              tooltip="Quick"
+              className="group-data-[collapsible=icon]:justify-center"
+              render={
+                <Link href="/">
+                  <img
+                    src="/quick.svg"
+                    alt="Quick Logo"
+                    className="size-8 shrink-0 group-data-[collapsible=icon]:size-4"
+                  />
+                  <span className="text-lg font-semibold group-data-[collapsible=icon]:hidden">
+                    Quick
+                  </span>
+                </Link>
+              }
+            />
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
@@ -37,12 +50,16 @@ export function AppSidebar() {
               {sidebarMenuItems.map((item) => (
                 <SidebarMenuItem key={item.label}>
                   <SidebarMenuButton
-                    isActive={location[0] === item.href ? true : false}
+                    isActive={location[0] === item.href}
                     size="lg"
+                    tooltip={item.label}
+                    className="group-data-[collapsible=icon]:justify-center"
                     render={
                       <Link href={item.href}>
                         <item.icon className="size-6!" />
-                        <span>{item.label}</span>
+                        <span className="group-data-[collapsible=icon]:hidden">
+                          {item.label}
+                        </span>
                       </Link>
                     }
                   />
@@ -57,10 +74,15 @@ export function AppSidebar() {
           <SidebarMenuItem>
             <SidebarMenuButton
               size="lg"
+              isActive={location[0] === "/settings"}
+              tooltip="Settings"
+              className="group-data-[collapsible=icon]:justify-center"
               render={
                 <Link href="/settings">
                   <IconSettings2 className="size-6!" />
-                  <span>Settings</span>
+                  <span className="group-data-[collapsible=icon]:hidden">
+                    Settings
+                  </span>
                 </Link>
               }
             />
