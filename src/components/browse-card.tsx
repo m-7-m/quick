@@ -12,7 +12,7 @@ export default function BrowseCard() {
   async function installApp(app: BrowseApp) {
     setBusyAppId(app.id)
     try {
-      await install(app.id)
+      await install(app.id, app.name)
       toast.success(`${app.name} installed successfully.`)
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : String(error)

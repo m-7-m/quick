@@ -9,8 +9,11 @@ import BrowsePage from "./pages/browse"
 import AppsPage from "./pages/apps"
 import ProfilesPage from "./pages/profiles"
 import SettingsPage from "./pages/settings"
+import { useBackgroundNotifications } from "@/hooks/use-background-notifications"
 
 export function App() {
+  useBackgroundNotifications()
+
   return (
     <SidebarProvider>
       <AppSidebar />

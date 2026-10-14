@@ -252,7 +252,7 @@ export default function ProfilesPage() {
       for (const [index, app] of appsToInstall.entries()) {
         setInstallProgress({ current: index + 1, total: appsToInstall.length })
         try {
-          await install(app.id)
+          await install(app.id, app.name)
           installed.push(app.name)
         } catch (error: unknown) {
           failed.push({ appId: app.name, message: errorMessage(error) })

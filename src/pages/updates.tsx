@@ -62,7 +62,7 @@ export default function UpdatesPage() {
   async function updateApp(app: AvailableUpdate) {
     setBusyAppId(app.id)
     try {
-      await update(app.id)
+      await update(app.id, app.name)
       toast.success(`${app.name} updated successfully.`)
       refreshUpdates()
     } catch (error: unknown) {

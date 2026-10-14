@@ -4,6 +4,7 @@ import Header from "@/components/header"
 import { AboutCard } from "@/components/settings/about-card"
 import { AppUpdatesCard } from "@/components/settings/app-updates-card"
 import { AppearanceCard } from "@/components/settings/appearance-card"
+import { AutostartCard } from "@/components/settings/autostart-card"
 import { NotificationsCard } from "@/components/settings/notifications-card"
 
 export default function SettingsPage() {
@@ -41,6 +42,7 @@ export default function SettingsPage() {
 
       <div className="grid gap-6 lg:grid-cols-2">
         <AppearanceCard />
+        <AutostartCard />
         <NotificationsCard />
         <AboutCard appVersion={appVersion} versionError={versionError} />
         <AppUpdatesCard appVersion={appVersion} />

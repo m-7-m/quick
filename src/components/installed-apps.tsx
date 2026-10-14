@@ -54,7 +54,7 @@ export default function InstalledApps() {
   async function uninstallApp(app: InstalledApp) {
     setBusyAppId(app.id)
     try {
-      await remove(app.id)
+      await remove(app.id, app.name)
       const remainingApps = apps.filter(
         (installedApp) => installedApp.id !== app.id
       )

@@ -83,7 +83,7 @@ export default function HomePage() {
   async function installApp(app: { id: string; name: string }) {
     setBusyAppId(app.id)
     try {
-      await install(app.id)
+      await install(app.id, app.name)
       toast.success(`${app.name} installed successfully.`)
       setSearchResults((results) =>
         results.filter((result) => result.id !== app.id)

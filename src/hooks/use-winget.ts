@@ -10,6 +10,7 @@ import {
   invalidateAvailableUpdatesCache,
   invalidateInstalledAppsCache,
 } from "@/lib/winget-cache"
+import { notifyInTray } from "@/lib/notifications"
 
 export type WingetPackage = {
   name: string
@@ -41,11 +42,12 @@ export function useWinget() {
   }, [])
 
   const install = useCallback(
-    (id: string) =>
+    (id: string, name = id) =>
       runOperation(async () => {
         await installApp(id)
         invalidateInstalledAppsCache()
         invalidateAvailableUpdatesCache()
+        void notifyInTray("App installed", `${name} was installed successfully.`)
       }),
     [runOperation]
   )
@@ -57,11 +59,12 @@ export function useWinget() {
     [runOperation]
   )
   const update = useCallback(
-    (id: string) =>
+    (id: string, name = id) =>
       runOperation(async () => {
         await updateApp(id)
         invalidateInstalledAppsCache()
         invalidateAvailableUpdatesCache()
+        void notifyInTray("App updated", `${name} was updated successfully.`)
       }),
     [runOperation]
   )
@@ -71,15 +74,20 @@ export function useWinget() {
         await updateAllApps()
         invalidateInstalledAppsCache()
         invalidateAvailableUpdatesCache()
+        void notifyInTray(
+          "Apps updated",
+          "All available app updates were installed successfully."
+        )
       }),
     [runOperation]
   )
   const remove = useCallback(
-    (id: string) =>
+    (id: string, name = id) =>
       runOperation(async () => {
         await removeApp(id)
         invalidateInstalledAppsCache()
         invalidateAvailableUpdatesCache()
+        void notifyInTray("App removed", `${name} was uninstalled successfully.`)
       }),
     [runOperation]
   )

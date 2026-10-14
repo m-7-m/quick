@@ -58,7 +58,7 @@ export default function SearchPage() {
   async function installApp(app: WingetPackage) {
     setBusyAppId(app.id)
     try {
-      await install(app.id)
+      await install(app.id, app.name)
       toast.success(`${app.name} installed successfully.`)
     } catch (error: unknown) {
       toast.error(`Could not install ${app.name}: ${errorMessage(error)}`)
