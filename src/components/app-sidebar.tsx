@@ -7,14 +7,12 @@ import {
   SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
-  SidebarMenuAction,
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
 import { sidebarMenuItems } from "@/constants/sidebar-menu"
-import { IconBrightness } from "@tabler/icons-react"
+import { IconSettings2 } from "@tabler/icons-react"
 import { Link, useLocation } from "wouter"
-import { ModeToggle } from "./mode-toggle"
 
 export function AppSidebar() {
   const location = useLocation()
@@ -57,13 +55,15 @@ export function AppSidebar() {
       <SidebarFooter>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton size="lg">
-              <IconBrightness />
-              <span>Theme</span>
-            </SidebarMenuButton>
-            <SidebarMenuAction>
-              <ModeToggle />
-            </SidebarMenuAction>
+            <SidebarMenuButton
+              size="lg"
+              render={
+                <Link href="/settings">
+                  <IconSettings2 className="size-6!" />
+                  <span>Settings</span>
+                </Link>
+              }
+            />
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarFooter>

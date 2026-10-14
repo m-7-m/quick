@@ -8,6 +8,7 @@ import UpdatesPage from "./pages/updates"
 import BrowsePage from "./pages/browse"
 import AppsPage from "./pages/apps"
 import ProfilesPage from "./pages/profiles"
+import SettingsPage from "./pages/settings"
 
 export function App() {
   return (
@@ -21,6 +22,7 @@ export function App() {
           <Route path="/updates" component={UpdatesPage} />
           <Route path="/browse" component={BrowsePage} />
           <Route path="/profiles" component={ProfilesPage} />
+          <Route path="/settings" component={SettingsPage} />
           <Route>404: No such page!</Route>
         </Switch>
         <Toaster position="top-center" />
