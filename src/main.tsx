@@ -5,6 +5,10 @@ import "./index.css"
 import App from "./App.tsx"
 import { ThemeProvider } from "@/components/theme-provider.tsx"
 
+if (import.meta.env.PROD) {
+  document.addEventListener("contextmenu", (event) => event.preventDefault())
+}
+
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <ThemeProvider>

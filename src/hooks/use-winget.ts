@@ -10,7 +10,7 @@ import {
   invalidateAvailableUpdatesCache,
   invalidateInstalledAppsCache,
 } from "@/lib/winget-cache"
-import { notifyInTray } from "@/lib/notifications"
+import { sendSystemNotification } from "@/lib/notifications"
 
 export type WingetPackage = {
   name: string
@@ -47,7 +47,10 @@ export function useWinget() {
         await installApp(id)
         invalidateInstalledAppsCache()
         invalidateAvailableUpdatesCache()
-        void notifyInTray("App installed", `${name} was installed successfully.`)
+        void sendSystemNotification(
+          "App installed",
+          `${name} was installed successfully.`
+        )
       }),
     [runOperation]
   )
@@ -64,7 +67,10 @@ export function useWinget() {
         await updateApp(id)
         invalidateInstalledAppsCache()
         invalidateAvailableUpdatesCache()
-        void notifyInTray("App updated", `${name} was updated successfully.`)
+        void sendSystemNotification(
+          "App updated",
+          `${name} was updated successfully.`
+        )
       }),
     [runOperation]
   )
@@ -74,7 +80,7 @@ export function useWinget() {
         await updateAllApps()
         invalidateInstalledAppsCache()
         invalidateAvailableUpdatesCache()
-        void notifyInTray(
+        void sendSystemNotification(
           "Apps updated",
           "All available app updates were installed successfully."
         )
@@ -87,7 +93,10 @@ export function useWinget() {
         await removeApp(id)
         invalidateInstalledAppsCache()
         invalidateAvailableUpdatesCache()
-        void notifyInTray("App removed", `${name} was uninstalled successfully.`)
+        void sendSystemNotification(
+          "App removed",
+          `${name} was uninstalled successfully.`
+        )
       }),
     [runOperation]
   )

@@ -11,10 +11,14 @@ export function areNotificationsEnabled() {
   return localStorage.getItem(NOTIFICATIONS_STORAGE_KEY) !== "false"
 }
 
-export async function notifyInTray(title: string, body: string) {
+export async function sendSystemNotification(
+  title: string,
+  body: string,
+  options: { onlyWhenHidden?: boolean } = {}
+) {
   if (
     !isTauri() ||
-    document.visibilityState !== "hidden" ||
+    (options.onlyWhenHidden && document.visibilityState !== "hidden") ||
     !areNotificationsEnabled()
   ) {
     return

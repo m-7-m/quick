@@ -1,6 +1,6 @@
 import { useEffect } from "react"
 import { isTauri } from "@tauri-apps/api/core"
-import { notifyInTray } from "@/lib/notifications"
+import { sendSystemNotification } from "@/lib/notifications"
 import { loadAvailableUpdates } from "@/lib/winget-cache"
 
 const UPDATE_CHECK_INTERVAL_MS = 15 * 60 * 1000
@@ -42,9 +42,10 @@ export function useBackgroundNotifications() {
 
         if (updates.length > 0 && shouldNotify) {
           const count = updates.length
-          void notifyInTray(
+          void sendSystemNotification(
             `${count} update${count === 1 ? "" : "s"} available`,
-            "Open Quick to review available app updates."
+            "Open Quick to review available app updates.",
+            { onlyWhenHidden: true }
           )
         }
       } catch (error: unknown) {
