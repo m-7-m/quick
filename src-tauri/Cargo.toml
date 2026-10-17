@@ -1,10 +1,10 @@
 [package]
 name = "app"
 version = "0.1.0"
-description = "A Tauri App"
-authors = ["you"]
-license = ""
-repository = ""
+description = "A Windows app manager powered by WinGet"
+authors = ["m-7-m"]
+license = "MIT"
+repository = "https://github.com/m-7-m/quick"
 edition = "2024"
 rust-version = "1.90"
 
